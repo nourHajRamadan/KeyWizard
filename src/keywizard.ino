@@ -31,6 +31,7 @@
 
 #include "Audio.h"
 #include "SD_MMC.h"
+int sd_begin_failed=0;
 
 #include "kwcli.h"
 
@@ -457,6 +458,11 @@ void init_rollers(){
   String favourites;
   for(int i=0;i<favCount;i++){favourites.concat(favourite_urls[i]); favourites.concat("\n");}
   if(!favourites.isEmpty())lv_roller_set_options(ui_Roller5, favourites.c_str(), LV_ROLLER_MODE_NORMAL);
+
+  if(sd_begin_failed){
+    Serial.println("SD-Card mounting failed..");
+    return;
+  }
 
   scriptPaths.clear();
   scriptTitles.clear();
@@ -1710,7 +1716,7 @@ void setup() {
   if (!SD_MMC.begin("/sdmmc", true, false, 20000))
   {
     esp_rom_printf("Card Mount Failed\n");
-
+    sd_begin_failed=1;
   }
 
   Wire.begin(I2C_SDA, I2C_SCL);
