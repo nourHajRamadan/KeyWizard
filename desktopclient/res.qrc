@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/all">
+        <file>style.qss</file>
+        <file>Pixellari.ttf</file>
+        <file>kwdc.png</file>
+        <file>icon.png</file>
+    </qresource>
+</RCC>

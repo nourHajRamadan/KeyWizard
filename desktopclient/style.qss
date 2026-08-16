@@ -1,0 +1,266 @@
+/* =========================================================
+   Global
+   ========================================================= */
+
+QWidget {
+    background-color: #050505;
+    color: #FF1010;
+    font-family: "Pixellari";
+    font-size: 16pt;
+}
+
+
+/* =========================================================
+   Main window / containers
+   ========================================================= */
+
+QMainWindow,
+QDialog,
+QWidget {
+    background-color: #050505;
+}
+
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+
+QPushButton {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+    border-radius: 3px;
+    padding: 6px 12px;
+}
+
+QPushButton:hover {
+    background-color: #180000;
+}
+
+QPushButton:pressed {
+    background-color: #FF1010;
+    color: #050505;
+}
+
+QPushButton:disabled {
+    color: #551010;
+    border-color: #551010;
+}
+
+
+/* =========================================================
+   Line edits
+   ========================================================= */
+
+QLineEdit {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+    border-radius: 3px;
+    padding: 5px;
+    selection-background-color: #FF1010;
+    selection-color: #050505;
+}
+
+QLineEdit:focus {
+    border: 1px solid #FF1010;
+}
+
+
+/* =========================================================
+   ComboBox
+   ========================================================= */
+
+QComboBox {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+    border-radius: 3px;
+    padding: 5px;
+}
+
+QComboBox:hover {
+    background-color: #180000;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+    selection-background-color: #FF1010;
+    selection-color: #050505;
+}
+
+
+/* =========================================================
+   List Views
+   ========================================================= */
+
+QListView {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+    outline: none;
+}
+
+QListView::item {
+    padding: 5px;
+    border-bottom: 1px solid #300000;
+}
+
+QListView::item:hover {
+    background-color: #180000;
+}
+
+QListView::item:selected {
+    background-color: #FF1010;
+    color: #050505;
+}
+
+
+/* =========================================================
+   Text Browser / Text Edit
+   ========================================================= */
+
+QTextBrowser,
+QTextEdit {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+    selection-background-color: #FF1010;
+    selection-color: #050505;
+}
+
+
+/* =========================================================
+   Labels
+   ========================================================= */
+
+QLabel {
+    background-color: transparent;
+    color: #FF1010;
+}
+
+
+/* =========================================================
+   Tab Widget
+   ========================================================= */
+
+QTabWidget::pane {
+    background-color: #050505;
+    border: 1px solid #FF1010;
+}
+
+QTabBar::tab {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+    padding: 7px 14px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:hover {
+    background-color: #180000;
+}
+
+QTabBar::tab:selected {
+    background-color: #FF1010;
+    color: #050505;
+}
+
+
+/* =========================================================
+   Group boxes
+   ========================================================= */
+
+QGroupBox {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 5px;
+    background-color: #050505;
+    color: #FF1010;
+}
+
+
+/* =========================================================
+   Checkboxes
+   ========================================================= */
+
+QCheckBox {
+    color: #FF1010;
+    spacing: 6px;
+}
+
+QCheckBox::indicator {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #FF1010;
+    background-color: #050505;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #FF1010;
+}
+
+
+/* =========================================================
+   Scroll bars
+   ========================================================= */
+
+QScrollBar:vertical {
+    background-color: #050505;
+    width: 10px;
+    border: 1px solid #FF1010;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #FF1010;
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    background: #050505;
+    border: none;
+}
+
+QScrollBar:horizontal {
+    background-color: #050505;
+    height: 10px;
+    border: 1px solid #FF1010;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #FF1010;
+    min-width: 20px;
+}
+
+
+/* =========================================================
+   Tooltips
+   ========================================================= */
+
+QToolTip {
+    background-color: #050505;
+    color: #FF1010;
+    border: 1px solid #FF1010;
+}
+
+
+/* =========================================================
+   Status bar
+   ========================================================= */
+
+QStatusBar {
+    background-color: #050505;
+    color: #FF1010;
+    border-top: 1px solid #FF1010;
+}
