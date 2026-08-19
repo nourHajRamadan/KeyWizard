@@ -267,7 +267,7 @@ enum ShortcutID {
   SC_WIN_L,
   SC_WIN_V,
   SC_WIN_I,
-
+  SC_WIN_R,
 
   // ctrl list
   SC_CTRL_A=300,
@@ -372,6 +372,7 @@ extern lv_obj_t * ui_Roller1;
 //passkeys
 extern lv_obj_t * ui_Screen5;
 extern void ui_Screen5_screen_init(void);
+extern lv_obj_t * ui_enterlabel2;
 extern lv_obj_t * ui_Roller3;
 extern lv_obj_t * ui_onebutton;
 extern lv_obj_t * ui_twobutton;
@@ -793,12 +794,29 @@ void update_pin_label()
 
 void send_slow_text(const char* text)
 {
-    while (*text)
+    while(*text)
     {
+        if(*text == '\\' && *(text + 1) == 't')
+        {
+            Keyboard.write(KEY_TAB);
+            delay(20);
+            text += 2;
+            continue;
+        }
+
+        if(*text == '\t')
+        {
+            Keyboard.write(KEY_TAB);
+            delay(20);
+            text++;
+            continue;
+        }
+
         Keyboard.press(*text);
-        delay(20);              // key down time
+        delay(20);
         Keyboard.release(*text);
-        delay(35);              // gap between keys
+        delay(35);
+
         text++;
     }
 }
@@ -959,6 +977,12 @@ void send_shortcut(int sc)
     case SC_WIN_V:
       Keyboard.press(KEY_LEFT_GUI);
       Keyboard.press('v');
+      Keyboard.releaseAll();
+      break;
+          
+    case SC_WIN_R:
+      Keyboard.press(KEY_LEFT_GUI);
+      Keyboard.press('r');
       Keyboard.releaseAll();
       break;
 
@@ -1165,9 +1189,7 @@ void CBwol_btn_event_cb(lv_event_t * e)
 {
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
 
-    while(connectToWifi()){
-      delay(20000);
-    } 
+    if(connectToWifi()) return;
 
     WOL.sendMagicPacket(CBtext);
 }
@@ -1341,9 +1363,11 @@ int connectToWifi(){
   }
 
   if (unlocked || kwconfig.unlock(enteredPin)){
+    lv_label_set_text(ui_enterlabel2,"Wait..");
     String tmp = kwconfig.getPasswordString("ap-password");
     res = wm.autoConnect("KeyWizard_AP",tmp.c_str());
     unlocked=true;
+    lv_label_set_text(ui_enterlabel2,"Enter");
   }else{
       Serial.println("Invalid unlock password");
   }
@@ -1606,9 +1630,11 @@ void enter_btn_cb(lv_event_t * e)
       {
         if (unlocked || kwconfig.unlock(enteredPin))
         {
+            lv_label_set_text(ui_enterlabel2,"Wait..");
             String passkey = kwconfig.getPasswordString(selectedAccount.c_str());
             send_slow_text(passkey.c_str());
             unlocked=true;
+            lv_label_set_text(ui_enterlabel2,"Enter");
         }
         else
         {
@@ -1630,12 +1656,19 @@ void fav_enter_event_cb(lv_event_t * e)
 
     uint16_t index = lv_roller_get_selected(ui_Roller5);
 
+    if(enteredPin.isEmpty()){
+      _ui_screen_change(&ui_Screen5, LV_SCR_LOAD_ANIM_FADE_ON, 300, 0, &ui_Screen5_screen_init);
+      return;
+    }
+
     if(index < favCount){
       if (unlocked || kwconfig.unlock(enteredPin))
       {
+        lv_label_set_text(ui_enterlabel2,"Wait..");
         String tmp = kwconfig.getFavouriteString(favourite_urls[index].c_str());
         open_url(tmp.c_str());
         unlocked=true;
+        lv_label_set_text(ui_enterlabel2,"Enter");
       }
       else
       {

@@ -215,7 +215,7 @@ void ui_Screen3_screen_init(void)
                                    LV_PART_SELECTED | LV_STATE_DEFAULT);
 
     ui_winlist = lv_dropdown_create(ui_Screen3);
-    lv_dropdown_set_options(ui_winlist, "Win+D\nWin+L\nWin+V\nWin+I");
+    lv_dropdown_set_options(ui_winlist, "Win+D\nWin+L\nWin+V\nWin+I\nWin+R");
     lv_obj_set_width(ui_winlist, 161);
     lv_obj_set_height(ui_winlist, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_winlist, -143);
