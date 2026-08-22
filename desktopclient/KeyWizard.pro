@@ -2,7 +2,7 @@ QT += widgets
 QT += serialport
 
 CONFIG += c++17
-CONFIG += console
+#CONFIG += console
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -25,3 +25,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     res.qrc
+
+RC_ICONS = kwicon.ico

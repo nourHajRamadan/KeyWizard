@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
+
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -100,6 +101,48 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
     return QMainWindow::eventFilter(watched, event);
 }
 
+QString MainWindow::getArduinoPath()
+{
+    QDir appDir(QCoreApplication::applicationDirPath());
+    QString arduinoPath = appDir.absoluteFilePath("arduino-cli.exe");
+
+    while(!QFile::exists(arduinoPath))
+    {
+        QMessageBox::warning(this, "Warning!", "Arduino CLI executable missing!");
+
+        QString src = QFileDialog::getOpenFileName(
+            this,
+            "Find arduino-cli.exe",
+            QDir::homePath(),
+            "Arduino CLI (arduino-cli.exe)"
+            );
+
+        if(src.isEmpty())
+            return QString();
+
+        if(QFileInfo(src).fileName().compare("arduino-cli.exe", Qt::CaseInsensitive) != 0)
+        {
+            QMessageBox::warning(
+                this,
+                "Failure!",
+                "The executable must be named \"arduino-cli.exe\"!"
+                );
+            continue;
+        }
+
+        if(!QFile::copy(src, arduinoPath))
+        {
+            QMessageBox::warning(
+                this,
+                "Failure!",
+                "The executable wasn't copied successfully."
+                );
+            continue;
+        }
+    }
+
+    return arduinoPath;
+}
 
 void MainWindow::refreshSerialPorts()
 {
@@ -137,7 +180,7 @@ bool MainWindow::openSerialPort()
     arguments << "baudrate=115200";
 
     ui->dispLabel->setText("Connecting to " + portName + "...");
-    QString cliPath = QCoreApplication::applicationDirPath() + "/arduino-cli.exe";
+    QString cliPath = getArduinoPath();
     serialProcess->start(cliPath, arguments);
 
     qDebug() << "Arduino CLI path:" << cliPath;

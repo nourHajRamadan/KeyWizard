@@ -10,6 +10,9 @@
 #include <QSerialPortInfo>
 #include <QInputDialog>
 #include <QStringListModel>
+#include <QMessageBox>
+#include <QDir>
+#include <QFileDialog>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -30,6 +33,7 @@ public:
     ~MainWindow() override;
 
     void closeEvent(QCloseEvent *event) override;
+    QString getArduinoPath();
     void refreshSerialPorts();
     bool openSerialPort();
     void sendCommand(QString command);
