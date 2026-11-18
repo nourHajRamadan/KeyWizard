@@ -25,7 +25,6 @@ SET(SOURCES ui_Screen1.c
     ui_img_enterbutton_png.c
     ui_img_play_png.c
     ui_img_pause_png.c
-    ui_img_spectrum_png.c
     ui_img_stop_png.c
     ui_img_minus_png.c
     ui_img_plus_png.c

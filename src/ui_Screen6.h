@@ -18,9 +18,9 @@ extern lv_obj_t * ui_background6;
 extern lv_obj_t * ui_Roller4;
 extern lv_obj_t * ui_enterbutton3;
 extern lv_obj_t * ui_enterlabel3;
+extern lv_obj_t * ui_powershellcheckbox;
 extern void ui_event_returnbutton5(lv_event_t * e);
 extern lv_obj_t * ui_returnbutton5;
-extern lv_obj_t * ui_powershellcheckbox;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

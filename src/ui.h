@@ -60,7 +60,6 @@ LV_IMG_DECLARE(ui_img_shortcuts2_png);    // assets/shortcuts2.png
 LV_IMG_DECLARE(ui_img_enterbutton_png);    // assets/enterbutton.png
 LV_IMG_DECLARE(ui_img_play_png);    // assets/play.png
 LV_IMG_DECLARE(ui_img_pause_png);    // assets/pause.png
-LV_IMG_DECLARE(ui_img_spectrum_png);    // assets/spectrum.png
 LV_IMG_DECLARE(ui_img_stop_png);    // assets/stop.png
 LV_IMG_DECLARE(ui_img_minus_png);    // assets/minus.png
 LV_IMG_DECLARE(ui_img_plus_png);    // assets/plus.png

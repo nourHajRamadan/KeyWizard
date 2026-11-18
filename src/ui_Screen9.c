@@ -6,6 +6,7 @@
 #include "ui.h"
 
 lv_obj_t * ui_Screen9 = NULL;
+lv_obj_t * ui_titlebutton2 = NULL;
 lv_obj_t * ui_title2 = NULL;
 lv_obj_t * ui_unlockslider = NULL;
 lv_obj_t * ui_unlocklabel = NULL;
@@ -21,6 +22,18 @@ void ui_Screen9_screen_init(void)
 {
     ui_Screen9 = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Screen9, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_titlebutton2 = lv_btn_create(ui_Screen9);
+    lv_obj_set_width(ui_titlebutton2, 425);
+    lv_obj_set_height(ui_titlebutton2, 50);
+    lv_obj_set_x(ui_titlebutton2, -2);
+    lv_obj_set_y(ui_titlebutton2, -44);
+    lv_obj_set_align(ui_titlebutton2, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_titlebutton2, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_titlebutton2, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_titlebutton2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_titlebutton2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_blend_mode(ui_titlebutton2, LV_BLEND_MODE_ADDITIVE, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_title2 = lv_label_create(ui_Screen9);
     lv_obj_set_width(ui_title2, LV_SIZE_CONTENT);   /// 1
@@ -116,6 +129,7 @@ void ui_Screen9_screen_destroy(void)
 
     // NULL screen variables
     ui_Screen9 = NULL;
+    ui_titlebutton2 = NULL;
     ui_title2 = NULL;
     ui_unlockslider = NULL;
     ui_unlocklabel = NULL;

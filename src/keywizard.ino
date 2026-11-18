@@ -150,6 +150,10 @@ void initPMU() {
 #define EXAMPLE_VOICE_VOLUME    (70)
 
 Audio audio;
+#define SPECTRUM_BARS 14
+lv_chart_series_t* spectrumSeries;
+lv_timer_t* spectrumTimer_obj = nullptr; 
+
 USBHIDConsumerControl Consumer;
 WiFiManager wm;
 
@@ -317,6 +321,7 @@ extern lv_obj_t * ui_batterystatuslabel2;
 extern lv_obj_t * ui_configlabel;
 extern lv_obj_t * ui_trackname2;
 extern lv_obj_t * ui_clocklabel;
+extern lv_obj_t * ui_titlebutton2;
 
 //keyboard
 extern lv_obj_t * ui_KeyboardTextArea;
@@ -368,6 +373,7 @@ extern lv_obj_t * ui_minusbutton;
 extern lv_obj_t * ui_plusbutton;
 extern lv_obj_t * ui_volumelabel;
 extern lv_obj_t * ui_Roller1;
+extern lv_obj_t * ui_spectrumchart;
 
 //passkeys
 extern lv_obj_t * ui_Screen5;
@@ -755,16 +761,75 @@ void mouseclick_btn_cb(lv_event_t* e)
     }
 }
 
+static uint16_t spectrumvalues[SPECTRUM_BARS] = {0};
+uint16_t spectrumcounter = 0;
+
+void init_spectrum()
+{
+    lv_chart_set_type(ui_spectrumchart, LV_CHART_TYPE_BAR);
+
+    lv_chart_set_point_count(ui_spectrumchart, SPECTRUM_BARS);
+    lv_chart_set_range(ui_spectrumchart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
+
+    spectrumSeries = lv_chart_add_series(
+        ui_spectrumchart,
+        lv_color_hex(0xFF1010),
+        LV_CHART_AXIS_PRIMARY_Y
+    );
+
+    for (int i = 0; i < SPECTRUM_BARS; i++)
+    {
+        spectrumvalues[i] = 0;
+        lv_chart_set_value_by_id(ui_spectrumchart, spectrumSeries, i, 0);
+    }
+
+    lv_chart_refresh(ui_spectrumchart);
+}
+
+void spectrumTimer_cb(lv_timer_t *timer)
+{
+    uint16_t value = random(0, 101);
+
+    spectrumvalues[spectrumcounter] = value;
+
+    lv_chart_set_value_by_id(
+        ui_spectrumchart,
+        spectrumSeries,
+        spectrumcounter,
+        value
+    );
+
+    lv_chart_refresh(ui_spectrumchart);
+
+    spectrumcounter++;
+    if (spectrumcounter >= SPECTRUM_BARS)
+        spectrumcounter = 0;
+}
+
 void update_play_icon(bool playing)
 {
-    if (!playing) {
+    if (!playing)
+    {
         lv_img_set_src(ui_playpauseindicator, &ui_img_pause_png);
         lv_obj_add_flag(ui_trackname, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(ui_trackname2, LV_OBJ_FLAG_HIDDEN);
-    } else {
+
+        if (spectrumTimer_obj)
+        {
+            lv_timer_del(spectrumTimer_obj);
+            spectrumTimer_obj = nullptr;
+        }
+    }
+    else
+    {
         lv_img_set_src(ui_playpauseindicator, &ui_img_play_png);
         lv_obj_clear_flag(ui_trackname, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(ui_trackname2, LV_OBJ_FLAG_HIDDEN);
+
+        if (!spectrumTimer_obj)
+        {
+            spectrumTimer_obj = lv_timer_create(spectrumTimer_cb, 100, NULL);
+        }
     }
 }
 
@@ -1331,6 +1396,7 @@ time_t now;
 struct tm tm;
 bool flipflop=false;
 lv_timer_t * flipflop_timer = NULL;
+char call_ui_time [70];
 
 void set_ntp_time(lv_timer_t *timer){
 
@@ -1343,6 +1409,7 @@ void set_ntp_time(lv_timer_t *timer){
 
     char ui_time [25];
     sprintf(ui_time,"%02d:%02d  %02d/%02d/%02d",tm.tm_hour,tm.tm_min, tm.tm_mday, tm.tm_mon+1, tm.tm_year+1900);
+    sprintf(call_ui_time, "It is %02d and %02d minutes right now",tm.tm_hour,tm.tm_min);
     lv_label_set_text(ui_IPlabel, ui_time);
     lv_label_set_text(ui_clocklabel, ui_time);
     flipflop=false;
@@ -1363,11 +1430,10 @@ int connectToWifi(){
   }
 
   if (unlocked || kwconfig.unlock(enteredPin)){
-    lv_label_set_text(ui_enterlabel2,"Wait..");
     String tmp = kwconfig.getPasswordString("ap-password");
     res = wm.autoConnect("KeyWizard_AP",tmp.c_str());
     unlocked=true;
-    lv_label_set_text(ui_enterlabel2,"Enter");
+
   }else{
       Serial.println("Invalid unlock password");
   }
@@ -1382,17 +1448,33 @@ int connectToWifi(){
   return 1;
 }
 
+void call_time_event_cb(lv_event_t * e)
+{
+    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    //if(!init_ntp_sig and connectToWifi()) return;
 
-int start_ota_loop=0;
+  //copied
+    time(&now);
+    localtime_r(&now, &tm);
+
+    char ui_time [25];
+    sprintf(ui_time,"%02d:%02d  %02d/%02d/%02d",tm.tm_hour,tm.tm_min, tm.tm_mday, tm.tm_mon+1, tm.tm_year+1900);
+    sprintf(call_ui_time, "It is %02d and %02d minutes right now",tm.tm_hour,tm.tm_min);
+    lv_label_set_text(ui_IPlabel, ui_time);
+    lv_label_set_text(ui_clocklabel, ui_time);
+
+    audio.connecttospeech(call_ui_time, "en");
+
+}
+
 
 void ota_bin_upload(lv_timer_t* timer){
 
-  if(connectToWifi()) return;
-  wm.setConfigPortalBlocking(false);
+    if(timer) lv_timer_del(timer);
+    if(connectToWifi()) return;
+    wm.setConfigPortalBlocking(false);
+    wm.startConfigPortal("KeyWizard_OTA_Portal", kwconfig.getPasswordString("ap-password").c_str());
 
-  wm.startConfigPortal("KeyWizard_OTA_Portal", kwconfig.getPasswordString("ap-password").c_str());
-  lv_timer_del(timer);
- 
 }
 
 void ota_btn_event_cb(lv_event_t * e)
@@ -1400,8 +1482,7 @@ void ota_btn_event_cb(lv_event_t * e)
     if (lv_event_get_code(e) != LV_EVENT_CLICKED)
         return;
 
-    lv_timer_create(ota_bin_upload,20000,NULL);
-    start_ota_loop=1;
+    lv_timer_create(ota_bin_upload,10,NULL);
 
 }
 
@@ -1457,7 +1538,6 @@ void battery_timer_cb(lv_timer_t * timer)
     }
 }
 
-
 void play_selected_track(int override=-1)
 {
     uint16_t index = override==-1?lv_roller_get_selected(ui_Roller1):override;
@@ -1489,8 +1569,6 @@ void play_selected_track(int override=-1)
             return;
         }
 
-        Serial.println("File exists.");
-
         lv_label_set_text(ui_trackname, musicTitles[index].c_str());
         lv_label_set_text(ui_trackname2, musicTitles[index].c_str());
         audio.connecttoFS(SD_MMC, musicPaths[index].c_str());
@@ -1498,6 +1576,7 @@ void play_selected_track(int override=-1)
 
     playerState = PLAYER_PLAYING;
     update_play_icon(true);
+    
 }
 
 void play_button_cb(lv_event_t * e)
@@ -1587,6 +1666,9 @@ void vol_down_cb(lv_event_t * e)
     audio.setVolume(volume);
     update_volume_label();
 }
+
+
+
 
 void digit_btn_cb(lv_event_t * e)
 {
@@ -1730,7 +1812,438 @@ void qmi_timer(lv_timer_t* t)
 
 }
 
+//----------------------------------------------------------------------
+// KeyWizard web interface
 
+bool isAPClient()
+{
+    IPAddress clientIP = wm.server->client().remoteIP();
+    IPAddress apIP = WiFi.softAPIP();
+
+    // Default ESP32 SoftAP subnet is /24.
+    // Only allow clients from the AP subnet.
+    if (apIP == IPAddress(0, 0, 0, 0))
+        return false;
+
+    return clientIP[0] == apIP[0] &&
+           clientIP[1] == apIP[1] &&
+           clientIP[2] == apIP[2];
+}
+
+bool requireAPClient()
+{
+    if (isAPClient())
+        return true;
+
+    wm.server->send(403, "text/plain", "Access denied");
+    return false;
+}
+
+String htmlEscape(const String& input)
+{
+    String output;
+    output.reserve(input.length() + 16);
+
+    for (unsigned int i = 0; i < input.length(); i++)
+    {
+        switch (input[i])
+        {
+            case '&':  output += "&amp;";  break;
+            case '<':  output += "&lt;";   break;
+            case '>':  output += "&gt;";   break;
+            case '"':  output += "&quot;"; break;
+            case '\'': output += "&#39;";  break;
+            default:   output += input[i]; break;
+        }
+    }
+
+    return output;
+}
+
+void redirectToKeyWizard()
+{
+    wm.server->sendHeader("Location", "/keywizard");
+    wm.server->send(303);
+}
+
+// Password list
+
+String getPasswordListHTML()
+{
+    accounts = kwconfig.getKeys(1);
+    accountCount = accounts.size();
+
+    String html = "";
+
+    html += "<form action='/send-password' method='POST' target='action-frame'>";
+    html += "<select name='key' required>";
+    html += "<option value='' disabled selected>Select a password key...</option>";
+
+    for (const String& key : accounts)
+    {
+        String escapedKey = htmlEscape(key);
+
+        html += "<option value='" + escapedKey + "'>";
+        html += escapedKey;
+        html += "</option>";
+    }
+
+    html += "</select>";
+    html += "<button type='submit'>Send password</button>";
+    html += "</form>";
+
+    return html;
+}
+
+// Main HTML page
+
+void handleKeyWizard()
+{
+    if (!requireAPClient())
+        return;
+
+    String html = R"rawliteral(
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>KeyWizard</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 20px;
+        background: #111;
+        background-color: #000000;
+        color: white;
+        font-family: Arial, sans-serif;
+    }
+
+    .container {
+        max-width: 520px;
+        margin: auto;
+        background-color: #000000;
+        border: none;
+    }
+
+    h1 {
+        color: #ff1010;
+        text-align: center;
+        border-bottom: 1px solid #FF1010;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 18px;
+        text-align: center;
+        margin-top: 0;
+    }
+
+    .subtitle {
+        color: #888;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .section {
+        background: #000000;
+        border: 2px solid #ff1010;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 18px;
+    }
+
+    input[type=text] {
+        width: 100%;
+        padding: 13px;
+        margin-bottom: 10px;
+        border: 1px solid #FF1010;
+        border-radius: 6px;
+        background: #111;
+        color: white;
+        font-size: 16px;
+    }
+
+    button {
+        border: none;
+        border-radius: 6px;
+        padding: 11px 15px;
+        background: #ff1010;
+        color: white;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    button:active {
+        background: #bb0000;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: #222;
+      color: white;
+      border: 1px solid #FF1010;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .password-entry {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid #ff1010;
+    }
+
+    .password-entry:last-child {
+        border-bottom: none;
+    }
+
+    .password-entry span {
+        overflow-wrap: anywhere;
+    }
+
+    .password-entry form {
+        flex-shrink: 0;
+    }
+
+    .shortcut-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .shortcut-grid button {
+        width: 100%;
+        background: #333;
+        border: 1px solid #555;
+    }
+
+    .shortcut-grid button:active {
+        background: #ff1010;
+    }
+
+    .empty {
+        color: #888;
+    }
+
+    .back {
+        display: inline-block;
+        color: #aaa;
+        text-decoration: none;
+        margin-bottom: 18px;
+    }
+
+    @font-face {
+        font-family: 'KeyWizardFont';
+        src: url('/custom.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    * {
+        font-family: 'KeyWizardFont', sans-serif !important;
+    }
+</style>
+</head>
+
+<body>
+
+<iframe name="action-frame" style="display:none;"></iframe>
+
+<div class="container">
+
+<a class="back" href="/">&#8592; WiFiManager</a>
+
+<h1>KeyWizard</h1>
+<p class="subtitle">Remote Keyboard Interface</p>
+
+<div class="section">
+    <h2>Send text</h2>
+
+    <form action="/send-text" method="POST" target="action-frame">
+        <input
+            type="text"
+            name="text"
+            placeholder="Type something..."
+            maxlength="500"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+        >
+
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<div class="section">
+    <h2>Passwords</h2>
+
+    )rawliteral";
+
+    html += getPasswordListHTML();
+
+    html += R"rawliteral(
+</div>
+
+<div class="section">
+    <h2>Shortcuts</h2>
+
+    <form action="/key-action" method="POST" target="action-frame">
+        <div class="shortcut-grid">
+
+            <button name="action" value="enter">Enter</button>
+            <button name="action" value="tab">Tab</button>
+            <button name="action" value="escape">Esc</button>
+
+            <button name="action" value="backspace">Backspace</button>
+            <button name="action" value="up">↑</button>
+            <button name="action" value="space">Space</button>
+
+            <button name="action" value="left">←</button>
+            <button name="action" value="down">↓</button>
+            <button name="action" value="right">→</button>
+
+            <button name="action" value="delete">Delete</button>
+            <button name="action" value="altf4">Alt + F4</button>
+            <button name="action" value="ctrla">Ctrl + A</button>
+
+            <button name="action" value="ctrlc">Ctrl + C</button>
+            <button name="action" value="ctrlv">Ctrl + V</button>
+
+        </div>
+    </form>
+</div>
+
+</div>
+</body>
+</html>
+)rawliteral";
+
+    wm.server->send(200, "text/html; charset=utf-8", html);
+}
+
+// Send text
+
+void handleSendText()
+{
+    if (!requireAPClient())
+        return;
+
+    if (!wm.server->hasArg("text"))
+    {
+        wm.server->send(400, "text/plain", "Missing text");
+        return;
+    }
+
+    String text = wm.server->arg("text");
+
+    if (text.length() > 0)
+        send_slow_text(text.c_str());
+
+    //redirectToKeyWizard();
+    wm.server->send(204, "text/plain", "");
+}
+
+// Send password
+
+void handleSendPassword()
+{
+    if (!requireAPClient())
+        return;
+
+    if (!wm.server->hasArg("key"))
+    {
+        wm.server->send(400, "text/plain", "Missing key");
+        return;
+    }
+
+    String key = wm.server->arg("key");
+
+    // Only allow keys that actually exist in the password namespace.
+    std::vector<String> keys = kwconfig.getKeys(1);
+    bool validKey = false;
+
+    for (const String& existingKey : keys)
+    {
+        if (existingKey == key)
+        {
+            validKey = true;
+            break;
+        }
+    }
+
+    if (!validKey)
+    {
+        wm.server->send(404, "text/plain", "Password not found");
+        return;
+    }
+
+    String password = kwconfig.getPasswordString(key.c_str());
+
+    if (password.length() > 0)
+    {
+        send_slow_text(password.c_str());
+        delay(100);
+        send_shortcut(SC_ENTER);
+    }
+
+    //redirectToKeyWizard();
+    wm.server->send(204, "text/plain", "");
+}
+
+// Shortcut buttons
+
+void handleKeyAction()
+{
+    if (!requireAPClient())
+        return;
+
+    if (!wm.server->hasArg("action"))
+    {
+        wm.server->send(400, "text/plain", "Missing action");
+        return;
+    }
+
+    String action = wm.server->arg("action");
+    int shortcut = -1;
+
+    if      (action == "enter")     shortcut = SC_ENTER;
+    else if (action == "tab")       shortcut = SC_TAB;
+    else if (action == "escape")    shortcut = SC_ESCAPE;
+    else if (action == "backspace") shortcut = SC_BACKSPACE;
+    else if (action == "delete")    shortcut = SC_DELETE;
+    else if (action == "space")     shortcut = SC_SPACE;
+    else if (action == "up")        shortcut = SC_UP;
+    else if (action == "down")      shortcut = SC_DOWN;
+    else if (action == "left")      shortcut = SC_LEFT;
+    else if (action == "right")     shortcut = SC_RIGHT;
+    else if (action == "altf4")     shortcut = SC_ALT_F4;
+    else if (action == "ctrla")     shortcut = SC_CTRL_A;
+    else if (action == "ctrlc")     shortcut = SC_CTRL_C;
+    else if (action == "ctrlv")     shortcut = SC_CTRL_V;
+
+    if (shortcut < 0)
+    {
+        wm.server->send(400, "text/plain", "Unknown action");
+        return;
+    }
+
+    send_shortcut(shortcut);
+    //redirectToKeyWizard();
+    wm.server->send(204, "text/plain", "");
+}
 
 void setup() {
 
@@ -1754,6 +2267,8 @@ void setup() {
 
   Wire.begin(I2C_SDA, I2C_SCL);
   TCA.begin();
+  TCA.pinMode1(1,OUTPUT);
+
 
   USB.begin();
   Keyboard.begin(KeyboardLayout_de_DE);
@@ -1761,7 +2276,79 @@ void setup() {
   Consumer.begin(); 
 
   es8311_codec_init();
-  TCA.pinMode1(1,OUTPUT);
+
+  wm.setDarkMode(true);
+
+  wm.setCustomMenuHTML(
+      "<form action='/keywizard' method='get'>"
+      "<button type='submit'>Remote Interface</button>"
+      "</form>"
+      "<br>"
+  );
+
+  wm.setCustomHeadElement(
+      "<style>"
+      "@font-face {"
+          "font-family: 'KeyWizardFont';"
+          "src: url('/custom.ttf') format('truetype');"
+      "}"
+      "* {"
+          "font-family: 'KeyWizardFont', sans-serif !important;"
+      "}"
+      "body, .main {"
+          "background-color: #000000 !important;"
+      "}"
+      "input, select, textarea, button {"
+          "border: 2px solid #FF1010 !important;"
+          "background-color: #000000 !important;"
+      "}"
+      "hr {"
+          "border-color: #FF1010 !important;"
+      "}"
+      "</style>"
+  );
+
+  std::vector<const char *> menu = {
+      "wifi",
+      "info",
+      "custom",
+      "restart",
+      "exit",
+      "sep",
+      "update"
+  };
+
+  wm.setMenu(menu);
+
+
+  wm.setWebServerCallback([]() {
+
+      wm.server->on("/keywizard", HTTP_GET, handleKeyWizard);
+
+      wm.server->on("/send-text", HTTP_POST, handleSendText);
+      wm.server->on("/send-password", HTTP_POST, handleSendPassword);
+      wm.server->on("/key-action", HTTP_POST, handleKeyAction);
+
+      wm.server->on("/custom.ttf", HTTP_GET, []() {
+          if (!isAPClient()) {
+              wm.server->send(403, "text/plain", "Forbidden");
+              return;
+          }
+
+          File fontFile = SD_MMC.open("/fonts/custom.ttf", FILE_READ);
+
+          if (!fontFile || fontFile.isDirectory()) {
+              wm.server->send(404, "text/plain", "Font not found");
+              return;
+          }
+
+          wm.server->streamFile(fontFile, "font/ttf");
+          fontFile.close();
+      });
+  });
+
+  
+  
   lcd_reset();
   randomSeed(esp_random());
 
@@ -1854,7 +2441,6 @@ void setup() {
   // lv_demo_music();
   // lv_demo_stress();
 
-
   ui_init();
 
   audio.setPinout(I2S_BCLK, I2S_LRCK, I2S_SDOUT, I2S_MCLK);
@@ -1863,14 +2449,19 @@ void setup() {
   time_timer = lv_timer_create(time_timer_cb, 1000, NULL);
   lv_timer_create(battery_timer_cb, 5000, NULL);
   lv_timer_create(qmi_timer, 500, NULL);
+  lv_chart_set_point_count(ui_spectrumchart, SPECTRUM_BARS);
+  lv_chart_set_range(ui_spectrumchart, LV_CHART_AXIS_PRIMARY_Y, 0, 128);
+  
 
   init_rollers();
   update_play_icon(0);
+  init_spectrum();
 
   lv_slider_set_range(ui_startslider, 0, 100);
   lv_obj_add_event_cb(ui_startslider, home_slider_cb, LV_EVENT_VALUE_CHANGED, NULL);
   lv_obj_add_event_cb(ui_OTAbutton, ota_btn_event_cb, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_titlebutton, config_btn_event_cb, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_titlebutton2, call_time_event_cb, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_poweroffbutton, poweroff_btn_event_cb, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_unlockslider, unlock_slider_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
@@ -1990,7 +2581,7 @@ void loop() {
   lv_timer_handler(); 
   kwcli.process();
   wm.process();
-  //if(start_ota_loop)server.handleClient();
+
   audio.loop();
 
   delay(1);
@@ -2018,7 +2609,9 @@ void audio_eof_mp3(const char *info)
     Serial.println("Track finished");
 
     if (playerState == PLAYER_PLAYING) {
-      play_selected_track(random(0,musicTitles.size()-1));
+      int rand = random(0,musicTitles.size()-1);
+      if(musicIsURL[rand]) rand=musicTitles.size()-1;
+      play_selected_track(rand);
     }
 }
 

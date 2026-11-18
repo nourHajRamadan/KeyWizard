@@ -8,9 +8,10 @@
 lv_obj_t * ui_Screen4 = NULL;
 lv_obj_t * ui_background4 = NULL;
 lv_obj_t * ui_Panel1 = NULL;
-lv_obj_t * ui_spectrumimage = NULL;
 lv_obj_t * ui_playtimelabel = NULL;
 lv_obj_t * ui_playpauseindicator = NULL;
+lv_obj_t * ui_spectrumchart = NULL;
+lv_obj_t * ui_trackname = NULL;
 lv_obj_t * ui_playposition = NULL;
 lv_obj_t * ui_stopbutton = NULL;
 lv_obj_t * ui_stopimage = NULL;
@@ -26,7 +27,6 @@ lv_obj_t * ui_Panel2 = NULL;
 lv_obj_t * ui_volumelabel = NULL;
 lv_obj_t * ui_Roller1 = NULL;
 lv_obj_t * ui_returnbutton3 = NULL;
-lv_obj_t * ui_trackname = NULL;
 // event funtions
 void ui_event_returnbutton3(lv_event_t * e)
 {
@@ -68,16 +68,6 @@ void ui_Screen4_screen_init(void)
     lv_obj_set_style_border_opa(ui_Panel1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_Panel1, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_spectrumimage = lv_img_create(ui_Panel1);
-    lv_img_set_src(ui_spectrumimage, &ui_img_spectrum_png);
-    lv_obj_set_width(ui_spectrumimage, 210);
-    lv_obj_set_height(ui_spectrumimage, 100);
-    lv_obj_set_x(ui_spectrumimage, 0);
-    lv_obj_set_y(ui_spectrumimage, 20);
-    lv_obj_set_align(ui_spectrumimage, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_spectrumimage, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_spectrumimage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-
     ui_playtimelabel = lv_label_create(ui_Panel1);
     lv_obj_set_width(ui_playtimelabel, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_playtimelabel, LV_SIZE_CONTENT);    /// 1
@@ -98,6 +88,42 @@ void ui_Screen4_screen_init(void)
     lv_obj_set_align(ui_playpauseindicator, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_playpauseindicator, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_playpauseindicator, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_spectrumchart = lv_chart_create(ui_Screen4);
+    lv_obj_set_width(ui_spectrumchart, 207);
+    lv_obj_set_height(ui_spectrumchart, 90);
+    lv_obj_set_x(ui_spectrumchart, -104);
+    lv_obj_set_y(ui_spectrumchart, -35);
+    lv_obj_set_align(ui_spectrumchart, LV_ALIGN_CENTER);
+    lv_chart_set_type(ui_spectrumchart, LV_CHART_TYPE_BAR);
+    lv_chart_set_point_count(ui_spectrumchart, 14);
+    lv_chart_set_div_line_count(ui_spectrumchart, 0, 0);
+    lv_chart_set_axis_tick(ui_spectrumchart, LV_CHART_AXIS_PRIMARY_X, 10, 5, 0, 0, false, 50);
+    lv_chart_set_axis_tick(ui_spectrumchart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 0, 0, false, 50);
+    lv_chart_set_axis_tick(ui_spectrumchart, LV_CHART_AXIS_SECONDARY_Y, 0, 0, 0, 0, false, 25);
+    lv_chart_series_t * ui_spectrumchart_series_1 = lv_chart_add_series(ui_spectrumchart, lv_color_hex(0xFF1010),
+                                                                        LV_CHART_AXIS_PRIMARY_Y);
+    static lv_coord_t ui_spectrumchart_series_1_array[] = { 0 };
+    lv_chart_set_ext_y_array(ui_spectrumchart, ui_spectrumchart_series_1, ui_spectrumchart_series_1_array);
+    lv_obj_set_style_bg_color(ui_spectrumchart, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_spectrumchart, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_spectrumchart, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_spectrumchart, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_trackname = lv_label_create(ui_Screen4);
+    lv_obj_set_width(ui_trackname, 140);
+    lv_obj_set_height(ui_trackname, 15);
+    lv_obj_set_x(ui_trackname, -78);
+    lv_obj_set_y(ui_trackname, -87);
+    lv_obj_set_align(ui_trackname, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_trackname, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_trackname, "xxxxxxxxxxxxxxxxxx");
+    lv_obj_add_flag(ui_trackname, LV_OBJ_FLAG_HIDDEN);     /// Flags
+    lv_obj_set_scroll_dir(ui_trackname, LV_DIR_TOP);
+    lv_obj_set_style_text_color(ui_trackname, lv_color_hex(0xFF1010), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_trackname, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_trackname, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_trackname, &ui_font_pixel15, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_playposition = lv_slider_create(ui_Screen4);
     lv_slider_set_value(ui_playposition, 0, LV_ANIM_OFF);
@@ -289,21 +315,6 @@ void ui_Screen4_screen_init(void)
     lv_obj_set_y(ui_returnbutton3, 110);
     lv_obj_set_align(ui_returnbutton3, LV_ALIGN_CENTER);
 
-    ui_trackname = lv_label_create(ui_Screen4);
-    lv_obj_set_width(ui_trackname, 140);
-    lv_obj_set_height(ui_trackname, 15);
-    lv_obj_set_x(ui_trackname, -78);
-    lv_obj_set_y(ui_trackname, -87);
-    lv_obj_set_align(ui_trackname, LV_ALIGN_CENTER);
-    lv_label_set_long_mode(ui_trackname, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_trackname, "xxxxxxxxxxxxxxxxxx");
-    lv_obj_add_flag(ui_trackname, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_set_scroll_dir(ui_trackname, LV_DIR_TOP);
-    lv_obj_set_style_text_color(ui_trackname, lv_color_hex(0xFF1010), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_trackname, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_trackname, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_trackname, &ui_font_pixel15, LV_PART_MAIN | LV_STATE_DEFAULT);
-
     lv_obj_add_event_cb(ui_returnbutton3, ui_event_returnbutton3, LV_EVENT_ALL, NULL);
 
 }
@@ -316,9 +327,10 @@ void ui_Screen4_screen_destroy(void)
     ui_Screen4 = NULL;
     ui_background4 = NULL;
     ui_Panel1 = NULL;
-    ui_spectrumimage = NULL;
     ui_playtimelabel = NULL;
     ui_playpauseindicator = NULL;
+    ui_spectrumchart = NULL;
+    ui_trackname = NULL;
     ui_playposition = NULL;
     ui_stopbutton = NULL;
     ui_stopimage = NULL;
@@ -334,6 +346,5 @@ void ui_Screen4_screen_destroy(void)
     ui_volumelabel = NULL;
     ui_Roller1 = NULL;
     ui_returnbutton3 = NULL;
-    ui_trackname = NULL;
 
 }

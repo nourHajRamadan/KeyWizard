@@ -14,6 +14,7 @@ extern "C" {
 extern void ui_Screen9_screen_init(void);
 extern void ui_Screen9_screen_destroy(void);
 extern lv_obj_t * ui_Screen9;
+extern lv_obj_t * ui_titlebutton2;
 extern lv_obj_t * ui_title2;
 extern lv_obj_t * ui_unlockslider;
 extern lv_obj_t * ui_unlocklabel;

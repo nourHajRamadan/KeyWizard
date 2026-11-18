@@ -10,8 +10,8 @@ lv_obj_t * ui_background6 = NULL;
 lv_obj_t * ui_Roller4 = NULL;
 lv_obj_t * ui_enterbutton3 = NULL;
 lv_obj_t * ui_enterlabel3 = NULL;
-lv_obj_t * ui_returnbutton5 = NULL;
 lv_obj_t * ui_powershellcheckbox = NULL;
+lv_obj_t * ui_returnbutton5 = NULL;
 // event funtions
 void ui_event_returnbutton5(lv_event_t * e)
 {
@@ -83,14 +83,6 @@ void ui_Screen6_screen_init(void)
     lv_obj_set_style_text_opa(ui_enterlabel3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_enterlabel3, &ui_font_pixel30, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_returnbutton5 = lv_imgbtn_create(ui_Screen6);
-    lv_imgbtn_set_src(ui_returnbutton5, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_backbutton_png, NULL);
-    lv_obj_set_width(ui_returnbutton5, 50);
-    lv_obj_set_height(ui_returnbutton5, 35);
-    lv_obj_set_x(ui_returnbutton5, -202);
-    lv_obj_set_y(ui_returnbutton5, 125);
-    lv_obj_set_align(ui_returnbutton5, LV_ALIGN_CENTER);
-
     ui_powershellcheckbox = lv_checkbox_create(ui_Screen6);
     lv_checkbox_set_text(ui_powershellcheckbox, "powershell");
     lv_obj_set_width(ui_powershellcheckbox, LV_SIZE_CONTENT);   /// 1
@@ -108,6 +100,14 @@ void ui_Screen6_screen_init(void)
     lv_obj_set_style_border_color(ui_powershellcheckbox, lv_color_hex(0xFF1010), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_powershellcheckbox, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
+    ui_returnbutton5 = lv_imgbtn_create(ui_Screen6);
+    lv_imgbtn_set_src(ui_returnbutton5, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_backbutton_png, NULL);
+    lv_obj_set_width(ui_returnbutton5, 50);
+    lv_obj_set_height(ui_returnbutton5, 35);
+    lv_obj_set_x(ui_returnbutton5, -202);
+    lv_obj_set_y(ui_returnbutton5, 125);
+    lv_obj_set_align(ui_returnbutton5, LV_ALIGN_CENTER);
+
     lv_obj_add_event_cb(ui_returnbutton5, ui_event_returnbutton5, LV_EVENT_ALL, NULL);
 
 }
@@ -122,7 +122,7 @@ void ui_Screen6_screen_destroy(void)
     ui_Roller4 = NULL;
     ui_enterbutton3 = NULL;
     ui_enterlabel3 = NULL;
-    ui_returnbutton5 = NULL;
     ui_powershellcheckbox = NULL;
+    ui_returnbutton5 = NULL;
 
 }

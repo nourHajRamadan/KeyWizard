@@ -16,9 +16,10 @@ extern void ui_Screen4_screen_destroy(void);
 extern lv_obj_t * ui_Screen4;
 extern lv_obj_t * ui_background4;
 extern lv_obj_t * ui_Panel1;
-extern lv_obj_t * ui_spectrumimage;
 extern lv_obj_t * ui_playtimelabel;
 extern lv_obj_t * ui_playpauseindicator;
+extern lv_obj_t * ui_spectrumchart;
+extern lv_obj_t * ui_trackname;
 extern lv_obj_t * ui_playposition;
 extern lv_obj_t * ui_stopbutton;
 extern lv_obj_t * ui_stopimage;
@@ -35,7 +36,6 @@ extern lv_obj_t * ui_volumelabel;
 extern lv_obj_t * ui_Roller1;
 extern void ui_event_returnbutton3(lv_event_t * e);
 extern lv_obj_t * ui_returnbutton3;
-extern lv_obj_t * ui_trackname;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus
